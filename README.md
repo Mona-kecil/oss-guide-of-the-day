@@ -1,21 +1,33 @@
 # OSS Guide of the Day
 
-A Raycast extension that turns the [Open Source Guides](https://opensource.guide/) into one practical, bite-sized lesson each day.
+Learn open source a little at a time. This Raycast extension turns the [Open Source Guides](https://opensource.guide/) into one practical, bite-sized lesson you can act on immediately.
 
-## Usage
+![A guide about choosing an open source license](metadata/legal-guide.jpeg)
 
-1. Open **Guide of the Day** in Raycast.
-2. Read the lesson and try the suggested action.
-3. Press `↵` for another guide, or `⌘ S` to snooze until tomorrow.
-4. Reopen the command and choose **Show Again** if you change your mind.
+## How it works
 
-Each card shows its parent guide, section, and topic. Your place in the daily sequence is remembered if you close Raycast. Snoozed guides and sequence progress reset after midnight in your local timezone. You can also open the original source section or copy a lesson from the Actions menu.
+- **137 concise lessons** cover all 13 English Open Source Guides.
+- A deterministic shuffled rotation gives you a different topic each day without repeating the same sequence in source order.
+- Press `↵` to continue to another guide. Raycast remembers your position if you close and reopen it.
+- Press `⌘ S` to snooze for the day. You can choose **Show Again** whenever you change your mind.
+- The guide position and snooze state reset at midnight in your local timezone.
+- Every card identifies its parent guide, section, and topic. Press `⌘ O` to read the original section.
+
+![Available actions and keyboard shortcuts](metadata/actions.jpeg)
+
+## Offline and private
+
+The lesson collection and section taxonomy are bundled with the extension, so reading and moving between guides works entirely offline. The two JSON files total about **104 KB uncompressed**.
+
+Only your current daily position and snooze date are stored in Raycast's on-device `LocalStorage`—a few bytes of data. Nothing is sent to an extension server. An internet connection is needed only when you choose to open the original guide.
+
+![A guide snoozed until local midnight](metadata/rest-mode.jpeg)
 
 ## Content and attribution
 
-The current dataset contains 137 concise, human-written adaptations across the 13 English guides published at [opensource.guide](https://opensource.guide/). Each lesson links to the source section it is based on. The source index in `scripts/source-index.json` records the headings found during the last scrape.
+The dataset contains 137 curated adaptations across the 13 English guides published at [opensource.guide](https://opensource.guide/). Every lesson points to the exact source section it is based on. The generated index in `scripts/source-index.json` records the source headings found during the latest validation run.
 
-The source content is copyright its authors and is available under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). Content is based on [github.com/github/opensource.guide](https://github.com/github/opensource.guide) and used under that license. This extension credits and links to the source, and the lessons are transformed summaries rather than copied passages. The extension's MIT license does not grant rights to third-party trademarks or assets. The legal material is educational, not legal advice.
+The original guide content is copyright its authors and available under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). It is based on [github.com/github/opensource.guide](https://github.com/github/opensource.guide) and used under that license. Lessons are transformed summaries rather than copied passages. The extension's MIT license does not grant rights to third-party trademarks or assets. Legal lessons are educational, not legal advice.
 
 ## Development
 
@@ -24,13 +36,13 @@ npm install
 npm run dev
 ```
 
-To check the source pages, headings, links, and deduplication without changing files:
+Validate source pages, section links, coverage, and deduplication:
 
 ```sh
 npm run check-guides
 ```
 
-To refresh the source index and the section taxonomy used by the extension, run the same slow, robots-aware scraper with:
+Refresh the source index and section taxonomy with the slow, robots-aware scraper:
 
 ```sh
 npm run scrape-guides
