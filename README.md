@@ -1,49 +1,56 @@
 # OSS Guide of the Day
 
-Learn open source a little at a time. This Raycast extension turns the [Open Source Guides](https://opensource.guide/) into one practical, bite-sized lesson you can act on immediately.
+Open source has plenty of good advice. Remembering it is the hard part.
+
+OSS Guide of the Day puts one short lesson in Raycast, where you already work. Read the idea, try one small action, then get on with your day.
 
 ![A guide about choosing an open source license](metadata/legal-guide.jpeg)
 
-## How it works
+## What you get
 
-- **137 concise lessons** cover all 13 English Open Source Guides.
-- A deterministic shuffled rotation gives you a different topic each day without repeating the same sequence in source order.
-- Press `↵` to continue to another guide. Raycast remembers your position if you close and reopen it.
-- Press `⌘ S` to snooze for the day. You can choose **Show Again** whenever you change your mind.
-- The guide position and snooze state reset at midnight in your local timezone.
-- Every card identifies its parent guide, section, and topic. Press `⌘ O` to read the original section.
+The extension includes 137 lessons based on all 13 English [Open Source Guides](https://opensource.guide/). A card tells you:
 
-![Available actions and keyboard shortcuts](metadata/actions.jpeg)
+- which guide, section, and topic it came from
+- the useful idea in a sentence or two
+- one concrete thing to try
 
-## Offline and private
+Press `↵` when you want another card. The order is shuffled but stable, so topics vary without jumping around at random each time you open Raycast. Your place is saved for the rest of the day.
 
-The lesson collection and section taxonomy are bundled with the extension, so reading and moving between guides works entirely offline. The two JSON files total about **104 KB uncompressed**.
+Press `⌘ S` to snooze until midnight. If you change your mind, open the command and choose **Show Again**. Press `⌘ O` to read the original section.
 
-Only your current daily position and snooze date are stored in Raycast's on-device `LocalStorage`—a few bytes of data. Nothing is sent to an extension server. An internet connection is needed only when you choose to open the original guide.
+![The actions menu with keyboard shortcuts](metadata/actions.jpeg)
+
+## It works offline
+
+The lessons ship with the extension. No account, feed, or extension server is involved. Reading a card and moving to the next one needs no internet connection.
+
+The guide data and section index take about 104 KB uncompressed. Raycast stores only two small values on your device: today's position and the date you snoozed. Opening the original source is the only action that needs the internet.
 
 ![A guide snoozed until local midnight](metadata/rest-mode.jpeg)
 
-## Content and attribution
+## Where the writing comes from
 
-The dataset contains 137 curated adaptations across the 13 English guides published at [opensource.guide](https://opensource.guide/). Every lesson points to the exact source section it is based on. The generated index in `scripts/source-index.json` records the source headings found during the latest validation run.
+These 137 cards are short adaptations of the [Open Source Guides](https://opensource.guide/), not copied passages. Each card points to the exact section behind it. `scripts/source-index.json` records the headings checked during the latest validation run.
 
-The original guide content is copyright its authors and available under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). It is based on [github.com/github/opensource.guide](https://github.com/github/opensource.guide) and used under that license. Lessons are transformed summaries rather than copied passages. The extension's MIT license does not grant rights to third-party trademarks or assets. Legal lessons are educational, not legal advice.
+The original guides belong to their authors and use the [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/). Their source lives at [github.com/github/opensource.guide](https://github.com/github/opensource.guide). This extension uses the MIT license. That license does not cover third-party names, logos, or source material. Legal cards teach general concepts, not legal advice.
 
-## Development
+## Work on the extension
 
 ```sh
 npm install
 npm run dev
 ```
 
-Validate source pages, section links, coverage, and deduplication:
+Check that source pages still exist, section links work, every guide has coverage, and no cards are duplicated:
 
 ```sh
 npm run check-guides
 ```
 
-Refresh the source index and section taxonomy with the slow, robots-aware scraper:
+Refresh the source index and section taxonomy:
 
 ```sh
 npm run scrape-guides
 ```
+
+The refresh script reads `robots.txt`, waits between requests, and keeps the card text separate from the scraped headings.
