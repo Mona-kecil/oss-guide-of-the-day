@@ -1,8 +1,10 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, LocalStorage, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { guides } from "./data/guides";
+import { taxonomy } from "./data/taxonomy";
 
 const DISMISSED_DATE_KEY = "dismissed-date";
+const GUIDE_PROGRESS_KEY = "guide-progress";
 const DAY_IN_MILLISECONDS = 86_400_000;
 
 function localDateKey(date = new Date()) {
@@ -30,13 +32,30 @@ function guideFor(dateKey: string, offset = 0) {
   return { guide: guides[index], index };
 }
 
+type GuideProgress = {
+  date: string;
+  offset: number;
+};
+
 export default function Command() {
   const today = localDateKey();
   const [dismissed, setDismissed] = useState<boolean>();
-  const [guideOffset, setGuideOffset] = useState(0);
+  const [guideOffset, setGuideOffset] = useState<number>();
 
   useEffect(() => {
-    LocalStorage.getItem<string>(DISMISSED_DATE_KEY).then((date) => setDismissed(date === today));
+    Promise.all([
+      LocalStorage.getItem<string>(DISMISSED_DATE_KEY),
+      LocalStorage.getItem<string>(GUIDE_PROGRESS_KEY),
+    ]).then(([dismissedDate, storedProgress]) => {
+      setDismissed(dismissedDate === today);
+
+      try {
+        const progress = storedProgress ? (JSON.parse(storedProgress) as GuideProgress) : undefined;
+        setGuideOffset(progress?.date === today && Number.isInteger(progress.offset) ? progress.offset : 0);
+      } catch {
+        setGuideOffset(0);
+      }
+    });
   }, [today]);
 
   async function dismiss() {
@@ -50,7 +69,14 @@ export default function Command() {
     setDismissed(false);
   }
 
-  if (dismissed === undefined) {
+  async function showNextGuide() {
+    const nextOffset = (guideOffset ?? 0) + 1;
+    const progress: GuideProgress = { date: today, offset: nextOffset };
+    await LocalStorage.setItem(GUIDE_PROGRESS_KEY, JSON.stringify(progress));
+    setGuideOffset(nextOffset);
+  }
+
+  if (dismissed === undefined || guideOffset === undefined) {
     return <Detail isLoading />;
   }
 
@@ -74,7 +100,16 @@ Changed your mind? You can bring it back now.`}
   }
 
   const { guide, index } = guideFor(today, guideOffset);
+  const location = taxonomy[guide.source];
+  const guideUrl = guide.source.split("#")[0];
+  const sectionPath = [location?.section, location?.topic].filter(Boolean).join(" › ");
   const markdown = `# Guide of the Day
+
+**From:** [${location?.guide ?? "Open Source Guides"}](${guideUrl})
+
+**Section:** ${sectionPath || "Overview"}
+
+---
 
 ## ${guide.title}
 
@@ -97,7 +132,7 @@ ${guide.action}
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Next Guide" icon={Icon.ArrowRight} onAction={() => setGuideOffset((offset) => offset + 1)} />
+          <Action title="Next Guide" icon={Icon.ArrowRight} onAction={showNextGuide} />
           <Action
             title="Snooze Until Tomorrow"
             icon={Icon.Moon}

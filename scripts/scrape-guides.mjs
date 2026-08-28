@@ -14,6 +14,7 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const DATA_PATH = resolve(ROOT, "src/data/guides.json");
 const INDEX_PATH = resolve(ROOT, "scripts/source-index.json");
+const TAXONOMY_PATH = resolve(ROOT, "src/data/taxonomy.json");
 
 const args = new Set(process.argv.slice(2));
 if (args.has("--help") || args.has("-h")) {
@@ -188,13 +189,21 @@ function extractGuidePage(html, url) {
   const title = cleanText(pageTitleMatch?.[1] ?? "");
   if (!title) throw new Error(`Could not find a page title in ${url}`);
 
+  const hierarchy = new Map();
   const sections = [...articleMatch[1].matchAll(/<h([2-4])\b([^>]*)>([\s\S]*?)<\/h\1>/gi)]
     .map((match) => {
+      const level = Number(match[1]);
       const idMatch = match[2].match(/\bid=["']([^"']+)["']/i);
       const heading = cleanText(match[3]);
-      return idMatch && heading
-        ? { title: heading, url: `${url}#${idMatch[1]}` }
-        : undefined;
+      if (!idMatch || !heading) return undefined;
+
+      hierarchy.set(level, heading);
+      for (let deeperLevel = level + 1; deeperLevel <= 4; deeperLevel += 1) hierarchy.delete(deeperLevel);
+      const parents = [...hierarchy.entries()]
+        .filter(([parentLevel]) => parentLevel < level)
+        .sort(([left], [right]) => left - right)
+        .map(([, parentTitle]) => parentTitle);
+      return { title: heading, url: `${url}#${idMatch[1]}`, level, parents };
     })
     .filter((section) => section !== undefined);
 
@@ -273,6 +282,21 @@ function indexFor(pages, guides) {
   };
 }
 
+function taxonomyFor(pages) {
+  return Object.fromEntries(
+    pages.flatMap((page) =>
+      page.sections.map((section) => [
+        section.url,
+        {
+          guide: page.title,
+          section: section.parents[0] ?? section.title,
+          topic: section.parents.length > 0 ? section.title : undefined,
+        },
+      ]),
+    ),
+  );
+}
+
 async function main() {
   console.log(`Reading ${ROBOTS_URL}`);
   const robots = parseRobots(await fetchText(ROBOTS_URL));
@@ -304,7 +328,9 @@ async function main() {
 
   if (shouldWrite) {
     await writeFile(INDEX_PATH, `${JSON.stringify(output, null, 2)}\n`);
+    await writeFile(TAXONOMY_PATH, `${JSON.stringify(taxonomyFor(pages), null, 2)}\n`);
     console.log(`Wrote ${INDEX_PATH}`);
+    console.log(`Wrote ${TAXONOMY_PATH}`);
   }
 
   console.log(`Validated ${guides.length} transformed entries across ${pages.length} source guides.`);

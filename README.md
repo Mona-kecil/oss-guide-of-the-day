@@ -9,7 +9,7 @@ A Raycast extension that turns the [Open Source Guides](https://opensource.guide
 3. Press `↵` for another guide, or `⌘ S` to snooze until tomorrow.
 4. Reopen the command and choose **Show Again** if you change your mind.
 
-Snoozed guides reset after midnight in your local timezone. You can also open the original source section or copy a lesson from the Actions menu.
+Each card shows its parent guide, section, and topic. Your place in the daily sequence is remembered if you close Raycast. Snoozed guides and sequence progress reset after midnight in your local timezone. You can also open the original source section or copy a lesson from the Actions menu.
 
 ## Content and attribution
 
@@ -30,7 +30,7 @@ To check the source pages, headings, links, and deduplication without changing f
 npm run check-guides
 ```
 
-To refresh the compact source index, run the same slow, robots-aware scraper with:
+To refresh the source index and the section taxonomy used by the extension, run the same slow, robots-aware scraper with:
 
 ```sh
 npm run scrape-guides
