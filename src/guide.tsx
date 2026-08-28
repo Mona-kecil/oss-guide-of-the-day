@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, LocalStorage, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, LocalStorage, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { guides } from "./data/guides";
 
@@ -22,16 +22,18 @@ function rotationStep(length: number) {
   return step;
 }
 
-function guideFor(dateKey: string) {
+function guideFor(dateKey: string, offset = 0) {
   const dayNumber = Math.floor(new Date(`${dateKey}T00:00:00Z`).getTime() / DAY_IN_MILLISECONDS);
-  // Walk every entry once per cycle while keeping adjacent days far apart in the source dataset.
-  const index = (((dayNumber * rotationStep(guides.length)) % guides.length) + guides.length) % guides.length;
-  return guides[index];
+  // Walk every entry once per cycle while keeping adjacent guides far apart in the source dataset.
+  const position = (dayNumber + offset) * rotationStep(guides.length);
+  const index = ((position % guides.length) + guides.length) % guides.length;
+  return { guide: guides[index], index };
 }
 
 export default function Command() {
   const today = localDateKey();
   const [dismissed, setDismissed] = useState<boolean>();
+  const [guideOffset, setGuideOffset] = useState(0);
 
   useEffect(() => {
     LocalStorage.getItem<string>(DISMISSED_DATE_KEY).then((date) => setDismissed(date === today));
@@ -43,6 +45,11 @@ export default function Command() {
     await popToRoot();
   }
 
+  async function showAgain() {
+    await LocalStorage.removeItem(DISMISSED_DATE_KEY);
+    setDismissed(false);
+  }
+
   if (dismissed === undefined) {
     return <Detail isLoading />;
   }
@@ -50,36 +57,57 @@ export default function Command() {
   if (dismissed) {
     return (
       <Detail
-        markdown="# You are all caught up
+        markdown={`# Rest mode
 
-Today's guide has been dismissed. A new one arrives at **00:00 in your local time**."
+Today's guide is snoozed until **00:00 local time**.
+
+---
+
+Changed your mind? You can bring it back now.`}
+        actions={
+          <ActionPanel>
+            <Action title="Show Again" icon={Icon.ArrowCounterClockwise} onAction={showAgain} />
+          </ActionPanel>
+        }
       />
     );
   }
 
-  const guide = guideFor(today);
-  const markdown = `# ${guide.title}
+  const { guide, index } = guideFor(today, guideOffset);
+  const markdown = `# Guide of the Day
 
-${guide.fact}
+## ${guide.title}
+
+> ${guide.fact}
 
 ---
 
-### Try this today
+## One small move
 
 ${guide.action}
 
-[Source: Open Source Guides](${guide.source}) · Adapted under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/).`;
+---
+
+**Guide ${index + 1} of ${guides.length}** · [Read the original section](${guide.source})
+
+*Adapted from Open Source Guides under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).*`;
 
   return (
     <Detail
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Done for Today" icon={Icon.Checkmark} onAction={dismiss} />
-          <Action.OpenInBrowser title="Read the Source Section" url={guide.source} />
+          <Action title="Next Guide" icon={Icon.ArrowRight} onAction={() => setGuideOffset((offset) => offset + 1)} />
+          <Action
+            title="Snooze Until Tomorrow"
+            icon={Icon.Moon}
+            shortcut={Keyboard.Shortcut.Common.Save}
+            onAction={dismiss}
+          />
+          <Action.OpenInBrowser title="Read the Original Section" url={guide.source} />
           <Action.CopyToClipboard
             title="Copy Guide"
-            content={`${guide.title}\n\n${guide.fact}\n\nTry this today: ${guide.action}\n\nSource: ${guide.source}`}
+            content={`${guide.title}\n\n${guide.fact}\n\nOne small move: ${guide.action}\n\nSource: ${guide.source}`}
           />
         </ActionPanel>
       }

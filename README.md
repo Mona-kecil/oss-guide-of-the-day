@@ -6,10 +6,10 @@ A Raycast extension that turns the [Open Source Guides](https://opensource.guide
 
 1. Open **Guide of the Day** in Raycast.
 2. Read the lesson and try the suggested action.
-3. Choose **Done for Today** (`↵`) to dismiss it.
-4. Come back after midnight in your local timezone for the next guide.
+3. Press `↵` for another guide, or `⌘ S` to snooze until tomorrow.
+4. Reopen the command and choose **Show Again** if you change your mind.
 
-You can also open the source section or copy the lesson from the Actions menu.
+Snoozed guides reset after midnight in your local timezone. You can also open the original source section or copy a lesson from the Actions menu.
 
 ## Content and attribution
 
