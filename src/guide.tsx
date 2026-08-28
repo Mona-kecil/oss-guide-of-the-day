@@ -99,15 +99,12 @@ Changed your mind? You can bring it back now.`}
     );
   }
 
-  const { guide, index } = guideFor(today, guideOffset);
+  const { guide } = guideFor(today, guideOffset);
   const location = taxonomy[guide.source];
-  const guideUrl = guide.source.split("#")[0];
   const sectionPath = [location?.section, location?.topic].filter(Boolean).join(" › ");
-  const markdown = `# Guide of the Day
+  const markdown = `# Guide of the Day · ${location?.guide ?? "Open Source Guides"}
 
-**From:** [${location?.guide ?? "Open Source Guides"}](${guideUrl})
-
-**Section:** ${sectionPath || "Overview"}
+### ${sectionPath || "Overview"}
 
 ---
 
@@ -123,8 +120,6 @@ ${guide.action}
 
 ---
 
-**Guide ${index + 1} of ${guides.length}** · [Read the original section](${guide.source})
-
 *Adapted from Open Source Guides under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).*`;
 
   return (
@@ -139,7 +134,11 @@ ${guide.action}
             shortcut={Keyboard.Shortcut.Common.Save}
             onAction={dismiss}
           />
-          <Action.OpenInBrowser title="Read the Original Section" url={guide.source} />
+          <Action.OpenInBrowser
+            title="Read the Original Section"
+            url={guide.source}
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
           <Action.CopyToClipboard
             title="Copy Guide"
             content={`${guide.title}\n\n${guide.fact}\n\nOne small move: ${guide.action}\n\nSource: ${guide.source}`}
