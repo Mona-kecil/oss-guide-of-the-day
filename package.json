@@ -16,10 +16,10 @@
   "commands": [
     {
       "name": "guide",
-      "title": "Guide",
-      "subtitle": "Render guide of the day",
-      "description": "Render guide of the day",
-      "mode": "no-view"
+      "title": "Guide of the Day",
+      "subtitle": "A bite-sized open source lesson",
+      "description": "Read one practical lesson from the Open Source Guides each day",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -37,6 +37,8 @@
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
+    "scrape-guides": "node scripts/scrape-guides.mjs --write",
+    "check-guides": "node scripts/scrape-guides.mjs",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
